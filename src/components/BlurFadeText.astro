@@ -1,0 +1,53 @@
+---
+interface Props {
+  text: string;
+  class?: string;
+  delay?: number;
+  duration?: number;
+  yOffset?: number;
+}
+
+const { text, class: className, delay = 0, duration = 0.4, yOffset = 8 } = Astro.props;
+---
+
+<div class="flex">
+  <span
+    class={className}
+    data-blur-fade-text
+    data-delay={delay}
+    data-duration={duration}
+    data-y-offset={yOffset}
+    style={`display:inline-block;opacity:0;filter:blur(8px);transform:translateY(${-yOffset}px)`}
+  >
+    {text}
+  </span>
+</div>
+
+<script>
+  import { gsap } from "gsap";
+
+  function reveal(el: HTMLElement) {
+    const delay = Number(el.dataset.delay ?? 0);
+    const duration = Number(el.dataset.duration ?? 0.4);
+    gsap.to(el, {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      duration,
+      delay,
+      ease: "power2.out",
+    });
+  }
+
+  function init() {
+    document
+      .querySelectorAll<HTMLElement>("[data-blur-fade-text]:not([data-bound])")
+      .forEach((el) => {
+        el.dataset.bound = "true";
+        reveal(el);
+      });
+  }
+
+  document.addEventListener("astro:page-load", init);
+  init();
+</script>

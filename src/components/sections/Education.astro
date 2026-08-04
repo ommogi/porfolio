@@ -1,0 +1,58 @@
+---
+import BlurFade from "@/components/BlurFade.astro";
+import ArrowUpRight from "@/components/icons/ArrowUpRight.astro";
+import { DATA } from "@/data/resume";
+
+const BLUR_FADE_DELAY = 0.04;
+---
+
+<section id="education">
+  <div class="flex min-h-0 flex-col gap-y-6">
+    <BlurFade delay={BLUR_FADE_DELAY * 7}>
+      <h2 class="text-xl font-bold">Educación</h2>
+    </BlurFade>
+    <div class="flex flex-col gap-8">
+      {
+        DATA.education.map((education, index) => {
+          const Tag = education.href ? "a" : "div";
+          return (
+            <BlurFade delay={BLUR_FADE_DELAY * 8 + index * 0.05}>
+              <Tag
+                href={education.href || undefined}
+                target={education.href ? "_blank" : undefined}
+                rel={education.href ? "noopener noreferrer" : undefined}
+                class="group flex items-center justify-between gap-x-3"
+              >
+                <div class="flex min-w-0 flex-1 items-center gap-x-3">
+                  {education.logoUrl ? (
+                    <img
+                      src={education.logoUrl}
+                      alt={education.school}
+                      class="size-8 shrink-0 overflow-hidden rounded-full border object-contain p-1 shadow ring-2 ring-border md:size-10"
+                    />
+                  ) : (
+                    <div class="size-8 shrink-0 overflow-hidden rounded-full border bg-muted shadow ring-2 ring-border md:size-10" />
+                  )}
+                  <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <div class="flex items-center gap-2 font-semibold leading-none">
+                      {education.school}
+                      {education.href && (
+                        <ArrowUpRight class="h-3.5 w-3.5 -translate-x-2 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100" />
+                      )}
+                    </div>
+                    <div class="font-sans text-sm text-muted-foreground">{education.degree}</div>
+                  </div>
+                </div>
+                <div class="flex flex-none items-center gap-1 text-right text-xs tabular-nums text-muted-foreground">
+                  <span>
+                    {education.start} - {education.end}
+                  </span>
+                </div>
+              </Tag>
+            </BlurFade>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

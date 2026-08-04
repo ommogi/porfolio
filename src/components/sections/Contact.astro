@@ -1,0 +1,41 @@
+---
+import FlickeringGrid from "@/components/FlickeringGrid.astro";
+import { DATA } from "@/data/resume";
+---
+
+<section id="contact">
+  <div class="relative rounded-xl border p-10">
+    <div class="absolute -top-4 left-1/2 z-10 -translate-x-1/2 rounded-xl border bg-primary px-4 py-1">
+      <span class="text-sm font-medium text-background">Contacto</span>
+    </div>
+    <div class="absolute inset-0 left-0 right-0 top-0 h-1/2 overflow-hidden rounded-xl">
+      <FlickeringGrid
+        class="h-full w-full"
+        squareSize={2}
+        gridGap={2}
+        style="mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent);"
+      />
+    </div>
+    <div class="relative flex flex-col items-center gap-4 text-center">
+      <h2 class="text-3xl font-bold tracking-tighter sm:text-5xl">Hablemos</h2>
+      <p class="mx-auto max-w-lg text-balance text-muted-foreground">
+        ¿Tienes una propuesta o quieres saber más sobre mi trabajo? Escríbeme a{" "}
+        <a
+          href={`mailto:${DATA.contact.email}`}
+          class="rounded-sm text-blue-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {DATA.contact.email}
+        </a>{" "}
+        o revisa mi código en{" "}
+        <a
+          href={DATA.contact.social.GitHub.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="rounded-sm text-blue-500 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          GitHub
+        </a>.
+      </p>
+    </div>
+  </div>
+</section>

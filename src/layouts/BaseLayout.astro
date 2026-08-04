@@ -1,0 +1,53 @@
+---
+import "@fontsource/geist-sans/400.css";
+import "@fontsource/geist-sans/500.css";
+import "@fontsource/geist-sans/600.css";
+import "@fontsource/geist-sans/700.css";
+import "@fontsource/geist-mono/400.css";
+import "@fontsource/geist-mono/500.css";
+import "@fontsource/geist-mono/600.css";
+import "@fontsource/geist-mono/700.css";
+import "@/styles/global.css";
+import Navbar from "@/components/Navbar.astro";
+import FlickeringGrid from "@/components/FlickeringGrid.astro";
+import { DATA } from "@/data/resume";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = DATA.name, description = DATA.description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem("theme");
+        const isDark = stored ? stored === "dark" : false;
+        if (isDark) document.documentElement.classList.add("dark");
+      })();
+    </script>
+  </head>
+  <body class="relative min-h-screen bg-background font-sans antialiased">
+    <div class="absolute inset-0 left-0 right-0 top-0 z-0 h-[100px] overflow-hidden">
+      <FlickeringGrid
+        class="h-full w-full"
+        squareSize={2}
+        gridGap={2}
+        style="mask-image: linear-gradient(to bottom, black, transparent); -webkit-mask-image: linear-gradient(to bottom, black, transparent);"
+      />
+    </div>
+    <div class="relative z-10 mx-auto max-w-2xl px-6 py-12 pb-24 sm:py-24">
+      <slot />
+    </div>
+    <Navbar />
+  </body>
+</html>

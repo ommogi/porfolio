@@ -1,0 +1,142 @@
+---
+import { cn } from "@/lib/utils";
+
+interface Props {
+  class?: string;
+  magnification?: number;
+  distance?: number;
+}
+
+const { class: className, magnification = 60, distance = 100 } = Astro.props;
+---
+
+<div
+  data-dock
+  data-magnification={magnification}
+  data-distance={distance}
+  class={cn(
+    "pointer-events-auto relative mx-auto flex h-14 w-fit items-end justify-center gap-2 overflow-visible rounded-full border bg-card/90 p-2 shadow-[0_0_10px_3px] shadow-primary/5 backdrop-blur-3xl",
+    className
+  )}
+>
+  <slot />
+</div>
+
+<script>
+  import { gsap } from "gsap";
+
+  const BASE_SIZE = 40;
+  const BASE_ICON_SIZE = 20;
+  const ICON_SIZE_RATIO = 0.5;
+
+  function piecewiseLerp(x: number, inputRange: number[], outputRange: number[]) {
+    if (x <= inputRange[0]) return outputRange[0];
+    if (x >= inputRange[inputRange.length - 1]) return outputRange[outputRange.length - 1];
+    for (let i = 0; i < inputRange.length - 1; i++) {
+      if (x >= inputRange[i] && x <= inputRange[i + 1]) {
+        const t = (x - inputRange[i]) / (inputRange[i + 1] - inputRange[i]);
+        return outputRange[i] + t * (outputRange[i + 1] - outputRange[i]);
+      }
+    }
+    return outputRange[outputRange.length - 1];
+  }
+
+  function initDock(dock: HTMLElement) {
+    const magnification = Number(dock.dataset.magnification ?? 60);
+    const distance = Number(dock.dataset.distance ?? 100);
+    const icons = Array.from(dock.querySelectorAll<HTMLElement>("[data-dock-icon]"));
+
+    const items = icons.map((icon) => {
+      const inner = icon.querySelector<HTMLElement>("[data-dock-icon-inner]");
+      const tooltip = icon.parentElement?.querySelector<HTMLElement>("[data-dock-tooltip]") ?? null;
+      if (tooltip) gsap.set(tooltip, { xPercent: -50, y: 4 });
+      return {
+        icon,
+        inner,
+        tooltip,
+        setWidth: gsap.quickTo(icon, "width", { duration: 0.3, ease: "power3.out" }),
+        setHeight: gsap.quickTo(icon, "height", { duration: 0.3, ease: "power3.out" }),
+        setInnerWidth: inner ? gsap.quickTo(inner, "width", { duration: 0.3, ease: "power3.out" }) : null,
+        setInnerHeight: inner ? gsap.quickTo(inner, "height", { duration: 0.3, ease: "power3.out" }) : null,
+      };
+    });
+
+    function resetSizes() {
+      for (const { setWidth, setHeight, setInnerWidth, setInnerHeight } of items) {
+        setWidth(BASE_SIZE);
+        setHeight(BASE_SIZE);
+        setInnerWidth?.(BASE_ICON_SIZE);
+        setInnerHeight?.(BASE_ICON_SIZE);
+      }
+    }
+
+    function showTooltip(tooltip: HTMLElement) {
+      gsap.to(tooltip, { opacity: 1, y: 0, duration: 0.15, ease: "power2.out", overwrite: true });
+    }
+
+    function hideTooltip(tooltip: HTMLElement) {
+      gsap.to(tooltip, { opacity: 0, y: 4, duration: 0.1, ease: "power2.in", overwrite: true });
+    }
+
+    let hovered: HTMLElement | null = null;
+
+    dock.addEventListener("mousemove", (e) => {
+      const mouseX = e.pageX;
+      let underCursor: HTMLElement | null = null;
+
+      for (const { icon, tooltip, setWidth, setHeight, setInnerWidth, setInnerHeight } of items) {
+        const bounds = icon.getBoundingClientRect();
+        const iconCenter = bounds.x + bounds.width / 2 + window.scrollX;
+        const dist = mouseX - iconCenter;
+        const size = piecewiseLerp(dist, [-distance, 0, distance], [BASE_SIZE, magnification, BASE_SIZE]);
+        const innerSize = piecewiseLerp(
+          dist,
+          [-distance, 0, distance],
+          [BASE_ICON_SIZE, magnification * ICON_SIZE_RATIO, BASE_ICON_SIZE]
+        );
+        setWidth(size);
+        setHeight(size);
+        setInnerWidth?.(innerSize);
+        setInnerHeight?.(innerSize);
+
+        const withinX = e.clientX >= bounds.left && e.clientX <= bounds.right;
+        const withinY = e.clientY >= bounds.top && e.clientY <= bounds.bottom;
+        if (tooltip && withinX && withinY) underCursor = tooltip;
+      }
+
+      // Re-evaluated every tick instead of relying only on mouseenter/mouseleave:
+      // the icons resize under the cursor as they magnify, so fast pointer
+      // movement across neighbours can skip a leave event and leave a
+      // tooltip stuck open. This self-corrects every mousemove regardless.
+      if (underCursor !== hovered) {
+        if (hovered) hideTooltip(hovered);
+        if (underCursor) showTooltip(underCursor);
+        hovered = underCursor;
+      }
+    });
+
+    dock.addEventListener("mouseleave", () => {
+      resetSizes();
+      if (hovered) {
+        hideTooltip(hovered);
+        hovered = null;
+      }
+    });
+
+    for (const { icon, tooltip } of items) {
+      if (!tooltip) continue;
+      icon.addEventListener("focus", () => showTooltip(tooltip));
+      icon.addEventListener("blur", () => hideTooltip(tooltip));
+    }
+  }
+
+  function initAll() {
+    document.querySelectorAll<HTMLElement>("[data-dock]:not([data-dock-bound])").forEach((dock) => {
+      dock.dataset.dockBound = "true";
+      initDock(dock);
+    });
+  }
+
+  document.addEventListener("astro:page-load", initAll);
+  initAll();
+</script>

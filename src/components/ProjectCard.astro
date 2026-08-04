@@ -1,0 +1,133 @@
+---
+import Badge from "@/components/Badge.astro";
+import Icon from "@/components/icons/Icon.astro";
+import ChevronDown from "@/components/icons/ChevronDown.astro";
+import { renderInlineMarkdown } from "@/lib/markdown";
+import type { LinkIconKey } from "@/data/resume";
+
+interface Props {
+  title: string;
+  href?: string;
+  description: string;
+  dates: string;
+  tags: readonly string[];
+  image?: string;
+  video?: string;
+  links?: readonly { type: string; href: string; icon: LinkIconKey }[];
+}
+
+const { title, href, description, dates, tags, image, video, links } = Astro.props;
+---
+
+<div class="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 hover:ring-2 hover:ring-muted" data-project-card>
+  <div class="relative aspect-video w-full shrink-0 overflow-hidden">
+    {
+      video ? (
+        <video src={video} autoplay loop muted playsinline class="absolute inset-0 h-full w-full object-cover" />
+      ) : image ? (
+        <img src={image} alt={title} class="absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <div class="absolute inset-0 bg-linear-to-br from-muted via-background to-muted" />
+      )
+    }
+
+    <div class="absolute left-3 top-3 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-xs tabular-nums text-white backdrop-blur-md">
+      {dates}
+    </div>
+
+    <button
+      type="button"
+      data-accordion-trigger
+      aria-expanded="false"
+      aria-label={`Ver más sobre ${title}`}
+      class="absolute right-3 top-3 flex size-8 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-black/35 text-white backdrop-blur-md transition-colors hover:bg-black/50"
+    >
+      <ChevronDown data-accordion-chevron class="h-4 w-4 stroke-2 transition-transform duration-200" />
+    </button>
+
+    <div class="absolute inset-x-0 bottom-0 p-3">
+      <h3 class="inline-block rounded-lg border border-white/10 bg-black/35 px-3 py-1.5 text-xl font-semibold leading-none text-white backdrop-blur-md">
+        {title}
+      </h3>
+    </div>
+  </div>
+
+  <div data-accordion-content class="overflow-hidden" style="height:0">
+    <div class="flex flex-col gap-3 p-4">
+      <div
+        class="prose max-w-full text-pretty font-sans text-xs leading-relaxed text-muted-foreground dark:prose-invert"
+        set:html={renderInlineMarkdown(description)}
+      />
+      {
+        tags && tags.length > 0 && (
+          <div class="flex flex-wrap gap-1">
+            {tags.map((tag) => (
+              <Badge variant="outline" class="h-6 w-fit border border-border px-2 text-[11px] font-medium">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )
+      }
+      {
+        (href || (links && links.length > 0)) && (
+          <div class="flex flex-wrap items-center gap-2">
+            {href && (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                <Badge class="flex items-center gap-1.5 bg-primary text-primary-foreground">
+                  <Icon name="globe" class="size-3" />
+                  Ver proyecto
+                </Badge>
+              </a>
+            )}
+            {links?.map((link) => (
+              <a href={link.href} target="_blank" rel="noopener noreferrer">
+                <Badge class="flex items-center gap-1.5 bg-primary text-primary-foreground">
+                  <Icon name={link.icon} class="size-3" />
+                  {link.type}
+                </Badge>
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  import { gsap } from "gsap";
+
+  function initAccordion(root: HTMLElement) {
+    const trigger = root.querySelector<HTMLElement>("[data-accordion-trigger]");
+    const content = root.querySelector<HTMLElement>("[data-accordion-content]");
+    const chevron = root.querySelector<HTMLElement>("[data-accordion-chevron]");
+    if (!trigger || !content) return;
+
+    trigger.addEventListener("click", () => {
+      const isOpen = trigger.getAttribute("aria-expanded") === "true";
+
+      if (isOpen) {
+        gsap.to(content, { height: 0, duration: 0.25, ease: "power2.inOut" });
+        gsap.to(chevron, { rotate: 0, duration: 0.2 });
+        trigger.setAttribute("aria-expanded", "false");
+      } else {
+        gsap.set(content, { height: "auto" });
+        const target = content.scrollHeight;
+        gsap.fromTo(content, { height: 0 }, { height: target, duration: 0.25, ease: "power2.inOut" });
+        gsap.to(chevron, { rotate: 180, duration: 0.2 });
+        trigger.setAttribute("aria-expanded", "true");
+      }
+    });
+  }
+
+  function initAll() {
+    document.querySelectorAll<HTMLElement>("[data-project-card]:not([data-accordion-bound])").forEach((root) => {
+      root.dataset.accordionBound = "true";
+      initAccordion(root);
+    });
+  }
+
+  document.addEventListener("astro:page-load", initAll);
+  initAll();
+</script>

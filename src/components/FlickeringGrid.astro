@@ -1,0 +1,162 @@
+---
+import { cn } from "@/lib/utils";
+
+interface Props {
+  class?: string;
+  squareSize?: number;
+  gridGap?: number;
+  flickerChance?: number;
+  maxOpacity?: number;
+  style?: string;
+}
+
+const {
+  class: className,
+  squareSize = 4,
+  gridGap = 6,
+  flickerChance = 0.3,
+  maxOpacity = 0.3,
+  style,
+} = Astro.props;
+---
+
+<div
+  class={cn("h-full w-full", className)}
+  style={style}
+  data-flickering-grid
+  data-square-size={squareSize}
+  data-grid-gap={gridGap}
+  data-flicker-chance={flickerChance}
+  data-max-opacity={maxOpacity}
+>
+  <canvas class="pointer-events-none"></canvas>
+</div>
+
+<script>
+  function resolveColor(): string {
+    const tempEl = document.createElement("div");
+    tempEl.style.color = "var(--foreground)";
+    tempEl.style.position = "absolute";
+    tempEl.style.visibility = "hidden";
+    document.body.appendChild(tempEl);
+    const computed = getComputedStyle(tempEl).color;
+    document.body.removeChild(tempEl);
+    return computed || "rgb(0, 0, 0)";
+  }
+
+  function toRGBAPrefix(color: string): string {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return "rgba(0, 0, 0,";
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b] = Array.from(ctx.getImageData(0, 0, 1, 1).data);
+    return `rgba(${r}, ${g}, ${b},`;
+  }
+
+  function initFlickeringGrid(container: HTMLElement) {
+    const canvas = container.querySelector("canvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const squareSize = Number(container.dataset.squareSize ?? 4);
+    const gridGap = Number(container.dataset.gridGap ?? 6);
+    const flickerChance = Number(container.dataset.flickerChance ?? 0.3);
+    const maxOpacity = Number(container.dataset.maxOpacity ?? 0.3);
+
+    let rgbaPrefix = toRGBAPrefix(resolveColor());
+    let cols = 0;
+    let rows = 0;
+    let squares = new Float32Array(0);
+    let dpr = window.devicePixelRatio || 1;
+    let isInView = false;
+    let animationFrameId = 0;
+    let lastTime = 0;
+
+    function updateColor() {
+      rgbaPrefix = toRGBAPrefix(resolveColor());
+    }
+
+    function setupCanvas() {
+      if (!canvas) return;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      cols = Math.floor(width / (squareSize + gridGap));
+      rows = Math.floor(height / (squareSize + gridGap));
+      squares = new Float32Array(cols * rows);
+      for (let i = 0; i < squares.length; i++) {
+        squares[i] = Math.random() * maxOpacity;
+      }
+    }
+
+    function updateSquares(deltaTime: number) {
+      for (let i = 0; i < squares.length; i++) {
+        if (Math.random() < flickerChance * deltaTime) {
+          squares[i] = Math.random() * maxOpacity;
+        }
+      }
+    }
+
+    function drawGrid() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const opacity = squares[i * rows + j];
+          ctx.fillStyle = `${rgbaPrefix}${opacity})`;
+          ctx.fillRect(
+            i * (squareSize + gridGap) * dpr,
+            j * (squareSize + gridGap) * dpr,
+            squareSize * dpr,
+            squareSize * dpr
+          );
+        }
+      }
+    }
+
+    function animate(time: number) {
+      if (!isInView) return;
+      const deltaTime = (time - lastTime) / 1000;
+      lastTime = time;
+      updateSquares(deltaTime);
+      drawGrid();
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    setupCanvas();
+
+    const resizeObserver = new ResizeObserver(() => setupCanvas());
+    resizeObserver.observe(container);
+
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        isInView = entry.isIntersecting;
+        if (isInView) {
+          lastTime = performance.now();
+          animationFrameId = requestAnimationFrame(animate);
+        } else {
+          cancelAnimationFrame(animationFrameId);
+        }
+      },
+      { threshold: 0 }
+    );
+    intersectionObserver.observe(canvas);
+
+    const themeObserver = new MutationObserver(updateColor);
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  }
+
+  function initAll() {
+    document.querySelectorAll<HTMLElement>("[data-flickering-grid]").forEach(initFlickeringGrid);
+  }
+
+  document.addEventListener("astro:page-load", initAll);
+  initAll();
+</script>

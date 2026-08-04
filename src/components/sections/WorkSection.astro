@@ -1,0 +1,17 @@
+---
+import BlurFade from "@/components/BlurFade.astro";
+import Work from "@/components/sections/Work.astro";
+
+const BLUR_FADE_DELAY = 0.04;
+---
+
+<section id="work">
+  <div class="flex min-h-0 flex-col gap-y-6">
+    <BlurFade delay={BLUR_FADE_DELAY * 5}>
+      <h2 class="text-xl font-bold">Experiencia Profesional</h2>
+    </BlurFade>
+    <BlurFade delay={BLUR_FADE_DELAY * 6}>
+      <Work />
+    </BlurFade>
+  </div>
+</section>

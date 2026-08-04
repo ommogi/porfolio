@@ -1,0 +1,27 @@
+---
+import BlurFade from "@/components/BlurFade.astro";
+import { DATA } from "@/data/resume";
+
+const BLUR_FADE_DELAY = 0.04;
+---
+
+<section id="availability">
+  <BlurFade delay={BLUR_FADE_DELAY * 2}>
+    <div class="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+      <span class="relative flex size-2.5 shrink-0">
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75"></span>
+        <span class="relative inline-flex size-2.5 rounded-full bg-emerald-500"></span>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-medium text-foreground">Disponible para nuevos proyectos</p>
+        <p class="text-xs text-muted-foreground">Abierto a colaborar en proyectos de desarrollo frontend.</p>
+      </div>
+      <a
+        href={`mailto:${DATA.contact.email}`}
+        class="shrink-0 rounded-sm text-xs font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      >
+        Hablemos
+      </a>
+    </div>
+  </BlurFade>
+</section>

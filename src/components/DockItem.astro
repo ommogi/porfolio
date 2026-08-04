@@ -1,0 +1,42 @@
+---
+import { cn } from "@/lib/utils";
+
+interface Props {
+  href?: string;
+  label: string;
+  external?: boolean;
+  class?: string;
+  id?: string;
+}
+
+const { href, label, external, class: className, id } = Astro.props;
+const Tag = href ? "a" : "button";
+---
+
+<div class="relative">
+  <Tag
+    id={id}
+    href={href}
+    type={Tag === "button" ? "button" : undefined}
+    target={external ? "_blank" : undefined}
+    rel={external ? "noopener noreferrer" : undefined}
+    data-dock-icon
+    class={cn(
+      "relative flex aspect-square size-10 shrink-0 items-center justify-center rounded-3xl border bg-background p-0 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground backdrop-blur-3xl cursor-pointer",
+      className
+    )}
+    aria-label={label}
+  >
+    <span data-dock-icon-inner class="flex size-5 items-center justify-center">
+      <slot />
+    </span>
+  </Tag>
+  <div
+    data-dock-tooltip
+    role="tooltip"
+    class="pointer-events-none absolute bottom-full left-1/2 mb-2 whitespace-nowrap rounded-xl bg-primary px-4 py-2 text-sm text-primary-foreground shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] opacity-0"
+  >
+    {label}
+    <span class="absolute left-1/2 top-full -mt-px h-2 w-2 -translate-x-1/2 rotate-45 bg-primary"></span>
+  </div>
+</div>

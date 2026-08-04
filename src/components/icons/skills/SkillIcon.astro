@@ -1,0 +1,41 @@
+---
+import Java from "./Java.astro";
+import Typescript from "./Typescript.astro";
+import Haskell from "./Haskell.astro";
+import Prolog from "./Prolog.astro";
+import Php from "./Php.astro";
+import Database from "./Database.astro";
+import Angular from "./Angular.astro";
+import Vue from "./Vue.astro";
+import Nuxt from "./Nuxt.astro";
+import Express from "./Express.astro";
+import Zap from "./Zap.astro";
+import Docker from "./Docker.astro";
+import Git from "./Git.astro";
+import Gitlab from "./Gitlab.astro";
+import Github from "@/components/icons/Github.astro";
+import type { SkillIconKey } from "@/data/resume";
+
+const icons = {
+  java: Java,
+  typescript: Typescript,
+  haskell: Haskell,
+  prolog: Prolog,
+  php: Php,
+  sql: Database,
+  angular: Angular,
+  vue: Vue,
+  nuxt: Nuxt,
+  express: Express,
+  nitro: Zap,
+  docker: Docker,
+  git: Git,
+  gitlab: Gitlab,
+  github: Github,
+};
+
+const { name, class: className } = Astro.props as { name: SkillIconKey; class?: string };
+const Cmp = icons[name];
+---
+
+<Cmp class={className} />

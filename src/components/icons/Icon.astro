@@ -1,0 +1,15 @@
+---
+import Github from "./Github.astro";
+import Linkedin from "./Linkedin.astro";
+import Youtube from "./Youtube.astro";
+import Email from "./Email.astro";
+import Globe from "./Globe.astro";
+import Home from "./Home.astro";
+
+const icons = { github: Github, linkedin: Linkedin, youtube: Youtube, email: Email, globe: Globe, home: Home };
+
+const { name, class: className } = Astro.props as { name: keyof typeof icons; class?: string };
+const Cmp = icons[name];
+---
+
+<Cmp class={className} />

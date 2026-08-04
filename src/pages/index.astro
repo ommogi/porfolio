@@ -1,0 +1,24 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Hero from "@/components/sections/Hero.astro";
+import Availability from "@/components/sections/Availability.astro";
+import About from "@/components/sections/About.astro";
+import WorkSection from "@/components/sections/WorkSection.astro";
+import Education from "@/components/sections/Education.astro";
+import Skills from "@/components/sections/Skills.astro";
+import Projects from "@/components/sections/Projects.astro";
+import Contact from "@/components/sections/Contact.astro";
+---
+
+<BaseLayout>
+  <main class="relative flex min-h-dvh flex-col gap-14">
+    <Hero />
+    <Availability />
+    <About />
+    <WorkSection />
+    <Education />
+    <Skills />
+    <Projects />
+    <Contact />
+  </main>
+</BaseLayout>

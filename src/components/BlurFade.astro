@@ -1,0 +1,66 @@
+---
+interface Props {
+  class?: string;
+  delay?: number;
+  duration?: number;
+  yOffset?: number;
+  blur?: string;
+}
+
+const { class: className, delay = 0, duration = 0.4, yOffset = 6, blur = "6px" } = Astro.props;
+---
+
+<div
+  class={className}
+  data-blur-fade
+  data-delay={delay}
+  data-duration={duration}
+  data-y-offset={yOffset}
+  data-blur={blur}
+  style={`opacity:0;filter:blur(${blur});transform:translateY(${-yOffset}px)`}
+>
+  <slot />
+</div>
+
+<script>
+  import { gsap } from "gsap";
+
+  function reveal(el: HTMLElement) {
+    const delay = Number(el.dataset.delay ?? 0);
+    const duration = Number(el.dataset.duration ?? 0.4);
+    const yOffset = Number(el.dataset.yOffset ?? 6);
+    gsap.to(el, {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      duration,
+      delay: 0.04 + delay,
+      ease: "power2.out",
+      onStart: () => {
+        el.style.transform = `translateY(${-yOffset}px)`;
+      },
+    });
+  }
+
+  function init() {
+    const els = document.querySelectorAll<HTMLElement>("[data-blur-fade]:not([data-blur-fade-bound])");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            reveal(entry.target as HTMLElement);
+            observer.unobserve(entry.target);
+          }
+        }
+      },
+      { rootMargin: "-50px", threshold: 0 }
+    );
+    els.forEach((el) => {
+      el.dataset.blurFadeBound = "true";
+      observer.observe(el);
+    });
+  }
+
+  document.addEventListener("astro:page-load", init);
+  init();
+</script>

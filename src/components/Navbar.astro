@@ -1,0 +1,53 @@
+---
+import Dock from "@/components/Dock.astro";
+import DockItem from "@/components/DockItem.astro";
+import Icon from "@/components/icons/Icon.astro";
+import Sun from "@/components/icons/Sun.astro";
+import Moon from "@/components/icons/Moon.astro";
+import { DATA } from "@/data/resume";
+
+const socials = Object.values(DATA.contact.social).filter((s) => s.navbar);
+---
+
+<div class="pointer-events-none fixed inset-x-0 bottom-4 z-30">
+  <Dock class="z-50">
+    {
+      DATA.navbar.map((item) => (
+        <DockItem href={item.href} label={item.label}>
+          <Icon name={item.icon} class="size-full rounded-sm object-contain overflow-hidden" />
+        </DockItem>
+      ))
+    }
+
+    <div class="mx-1 my-auto h-2/3 w-px bg-border" role="separator"></div>
+
+    {
+      socials.map((social) => (
+        <DockItem href={social.url} label={social.name} external>
+          <Icon name={social.icon} class="size-full rounded-sm object-contain overflow-hidden" />
+        </DockItem>
+      ))
+    }
+
+    <div class="mx-1 my-auto h-2/3 w-px bg-border" role="separator"></div>
+
+    <DockItem id="theme-toggle" label="Tema">
+      <Sun class="size-full dark:hidden" />
+      <Moon class="hidden size-full dark:block" />
+    </DockItem>
+  </Dock>
+</div>
+
+<script>
+  function initThemeToggle() {
+    const btn = document.getElementById("theme-toggle");
+    btn?.addEventListener("click", () => {
+      const root = document.documentElement;
+      const isDark = root.classList.toggle("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+  }
+
+  document.addEventListener("astro:page-load", initThemeToggle);
+  initThemeToggle();
+</script>
