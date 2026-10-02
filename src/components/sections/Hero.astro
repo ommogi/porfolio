@@ -23,15 +23,23 @@ const BLUR_FADE_DELAY = 0.04;
         />
       </div>
       <BlurFade delay={BLUR_FADE_DELAY} class="order-1 md:order-2">
-        <span class="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted shadow-lg ring-4 ring-muted md:size-32">
-          {
-            DATA.avatarUrl ? (
-              <img src={DATA.avatarUrl} alt={DATA.name} class="h-full w-full object-cover" />
-            ) : (
+        {
+          DATA.avatarUrl ? (
+            <span class="group relative mt-12 block size-32 shrink-0 md:mt-6 md:size-40">
+              <span class="absolute inset-0 rounded-full bg-gradient-to-b from-violet-300 via-violet-500 to-indigo-900 shadow-xl shadow-violet-500/30 ring-4 ring-muted" />
+              {/* Full figure sits on the circle; image bottom aligned so the laptop rests on the circle's base */}
+              <img
+                src={DATA.avatarUrl}
+                alt={DATA.name}
+                class="absolute left-[12.5%] top-[-51%] w-[75%] max-w-none drop-shadow-xl transition-transform duration-300 ease-out group-hover:-translate-y-1"
+              />
+            </span>
+          ) : (
+            <span class="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted shadow-lg ring-4 ring-muted md:size-32">
               <span class="text-2xl font-semibold text-muted-foreground md:text-3xl">{DATA.initials}</span>
-            )
-          }
-        </span>
+            </span>
+          )
+        }
       </BlurFade>
     </div>
   </div>

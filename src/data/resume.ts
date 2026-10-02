@@ -29,7 +29,7 @@ export const DATA = {
     "Desarrollador Frontend enfocado en interfaces reactivas y escalables. Estudiante de Ingeniería Informática y técnico en DAW.",
   summary:
     "Estudiante de Ingeniería Informática y técnico en DAW especializado en el desarrollo frontend. Experiencia en entornos reales de producción (GEINFOR) trabajando con Angular y testing automatizado. Enfocado en la creación de interfaces reactivas, escalables y en la aplicación de metodologías ágiles.",
-  avatarUrl: "/me.png",
+  avatarUrl: "/Avatar_ommogi.png",
   skills: [
     { name: "Java", icon: "java" as SkillIconKey },
     { name: "TypeScript", icon: "typescript" as SkillIconKey },
