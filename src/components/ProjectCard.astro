@@ -23,7 +23,15 @@ const { title, href, description, dates, tags, image, video, links } = Astro.pro
   <div class="relative aspect-video w-full shrink-0 overflow-hidden">
     {
       video ? (
-        <video src={video} autoplay loop muted playsinline class="absolute inset-0 h-full w-full object-cover" />
+        <video
+          src={video}
+          loop
+          muted
+          playsinline
+          preload="none"
+          data-project-video
+          class="absolute inset-0 h-full w-full object-cover"
+        />
       ) : image ? (
         <img src={image} alt={title} class="absolute inset-0 h-full w-full object-cover" />
       ) : (
@@ -121,11 +129,35 @@ const { title, href, description, dates, tags, image, video, links } = Astro.pro
     });
   }
 
+  function initVideo(video: HTMLVideoElement) {
+    // preload="none" + play/pause on visibility: avoids downloading and
+    // decoding every project video up front, and stops decode work for
+    // videos scrolled out of view (both were costing real main-thread work
+    // that competed with scroll compositing).
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(video);
+  }
+
   function initAll() {
     document.querySelectorAll<HTMLElement>("[data-project-card]:not([data-accordion-bound])").forEach((root) => {
       root.dataset.accordionBound = "true";
       initAccordion(root);
     });
+    document
+      .querySelectorAll<HTMLVideoElement>("[data-project-video]:not([data-video-bound])")
+      .forEach((video) => {
+        video.dataset.videoBound = "true";
+        initVideo(video);
+      });
   }
 
   document.addEventListener("astro:page-load", initAll);

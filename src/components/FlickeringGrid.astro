@@ -74,6 +74,8 @@ const {
     let isInView = false;
     let animationFrameId = 0;
     let lastTime = 0;
+    let lastDrawTime = 0;
+    const FRAME_INTERVAL = 1000 / 30;
 
     function updateColor() {
       rgbaPrefix = toRGBAPrefix(resolveColor());
@@ -123,10 +125,16 @@ const {
 
     function animate(time: number) {
       if (!isInView) return;
-      const deltaTime = (time - lastTime) / 1000;
-      lastTime = time;
-      updateSquares(deltaTime);
-      drawGrid();
+      // Throttled to ~30fps: this is background noise, not motion that needs
+      // 60fps, and the per-cell canvas redraw is real synchronous main-thread
+      // work that otherwise competes with scroll compositing.
+      if (time - lastDrawTime >= FRAME_INTERVAL) {
+        const deltaTime = (time - lastTime) / 1000;
+        lastTime = time;
+        lastDrawTime = time;
+        updateSquares(deltaTime);
+        drawGrid();
+      }
       animationFrameId = requestAnimationFrame(animate);
     }
 
